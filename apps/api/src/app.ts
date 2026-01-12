@@ -6,12 +6,11 @@ import { authRoute } from "./routes/auth";
 const app = new Hono();
 
 app.use("*", logger());
-app.use("*", cors());
 
 app.use(
   "/api/*",
   cors({
-    origin: ["http://localhost:3000"], // Web
+    origin: [process.env.FRONTEND_URL || "http://localhost:3000"], // Web app
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
