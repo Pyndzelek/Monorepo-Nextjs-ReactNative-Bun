@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { createInsertSchema } from "drizzle-zod";
-import { users } from "../schema/user";
+import { user } from "../schema/auth";
 
-const insertUserSchemaBase = createInsertSchema(users, {
+const insertUserSchemaBase = createInsertSchema(user, {
   name: z
     .string()
     .min(2, "Name must be at least 2 characters")
@@ -15,6 +15,6 @@ export const updateUserSchema = insertUserSchemaBase
   .partial();
 
 // Export the types
-export type User = typeof users.$inferSelect;
+export type User = typeof user.$inferSelect;
 export type CreateUser = z.infer<typeof createUserSchema>;
 export type UpdateUser = z.infer<typeof updateUserSchema>;

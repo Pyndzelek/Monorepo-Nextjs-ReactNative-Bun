@@ -1,12 +1,24 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
-import { usersRoute } from "./routes/users";
+import { authRoute } from "./routes/auth";
 
 const app = new Hono();
 
 app.use("*", logger());
 app.use("*", cors());
+
+app.use(
+  "/api/*",
+  cors({
+    origin: ["http://localhost:3000"], // Web
+    allowHeaders: ["Content-Type", "Authorization"],
+    allowMethods: ["POST", "GET", "OPTIONS"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
+    credentials: true,
+  })
+);
 
 const routes = app
   .basePath("/api")
@@ -16,7 +28,7 @@ const routes = app
       timestamp: new Date().toISOString(),
     });
   })
-  .route("/users", usersRoute);
+  .route("/auth", authRoute);
 
 // Error Handling
 app.onError((err, c) => {
