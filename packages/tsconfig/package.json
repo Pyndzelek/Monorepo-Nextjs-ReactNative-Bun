@@ -6,7 +6,8 @@
     "base.json"
   ],
   "exports": {
-    "./base.json": "./base.json"
+    "./base.json": "./base.json",
+    "./react-native.json": "./react-native.json"
   },
   "devDependencies": {
     "@types/node": "22.13.0",

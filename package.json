@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
+    "dev:mobile": "pnpm --filter mobile start",
+    "dev:all": "pnpm --parallel --filter web --filter api --filter mobile dev",
     "build": "pnpm -r run build",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules",
     "clean:build": "rm -rf packages/*/dist packages/*/.tsbuildinfo apps/*/.next",
