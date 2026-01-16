@@ -10,7 +10,10 @@ app.use("*", logger());
 app.use(
   "/api/*",
   cors({
-    origin: [process.env.FRONTEND_URL || "http://localhost:3000"], // Web app
+    origin: [
+      process.env.FRONTEND_URL || "http://localhost:3000",
+      "exp://192.168.1.13:8081",
+    ], // Web app
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],

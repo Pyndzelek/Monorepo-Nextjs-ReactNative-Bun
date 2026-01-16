@@ -1,4 +1,6 @@
 import { betterAuth } from "better-auth";
+import { expo } from "@better-auth/expo";
+
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@repo/db/client";
 import * as schema from "@repo/db/schemas";
@@ -37,11 +39,13 @@ const authOptions = {
     window: 60, // 1 minute
     max: 10, // 10 requests per minute
   },
-  plugins: [bearer()],
-  trustedOrigins: [process.env.FRONTEND_URL || "http://localhost:3000"], //web app
+  plugins: [bearer(), expo()],
+  trustedOrigins: [
+    process.env.FRONTEND_URL || "http://localhost:3000",
+    "exp://192.168.1.13:8081",
+  ], //web app
 };
 
-// GLOBAL SINGLETON PATTERN
 export const auth = (globalThis as any).auth || betterAuth(authOptions);
 
 if (process.env.NODE_ENV !== "production") {

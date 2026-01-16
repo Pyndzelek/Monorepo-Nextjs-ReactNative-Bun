@@ -10,9 +10,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@better-auth/expo": "1.4.13",
     "@hono/zod-validator": "0.4.2",
     "@repo/db": "workspace:*",
-    "better-auth": "^1.4.11",
+    "better-auth": "1.4.13",
     "hono": "4.11.3",
     "zod": "4.3.5"
   },
