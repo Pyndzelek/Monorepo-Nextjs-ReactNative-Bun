@@ -1,6 +1,6 @@
 # Monorepo boilerplate
 
-## This branch provides a structure where zod schemas generated with drizzle-zod are inside db package
+## This monorepo provides complete authentication flows with Better auth for Nextjs + ReactNative + Bun, Hono, Drizzle, Zod
 
 A production-ready, high-performance full-stack monorepo featuring: **Bun**, **Hono**, and **Next.js**.
 
