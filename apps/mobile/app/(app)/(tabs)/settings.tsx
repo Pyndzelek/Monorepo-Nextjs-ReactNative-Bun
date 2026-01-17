@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Colors } from "../../../constants/colors";
 import useAuth from "@/hooks/useAuth";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Settings() {
   const { signOut, user } = useAuth();
@@ -40,7 +41,7 @@ export default function Settings() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
@@ -76,7 +77,7 @@ export default function Settings() {
           </Pressable>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
