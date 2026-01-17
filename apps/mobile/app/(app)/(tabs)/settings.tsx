@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -8,11 +8,11 @@ import {
   View,
 } from "react-native";
 import { Colors } from "../../../constants/colors";
-import { useAuth } from "../../../contexts/AuthContext";
-import { authClient } from "../../../lib/auth-client";
+import useAuth from "@/hooks/useAuth";
 
 export default function Settings() {
-  const { session } = useAuth();
+  const { signOut, user } = useAuth();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignOut = async () => {
@@ -27,8 +27,7 @@ export default function Settings() {
         onPress: async () => {
           setIsLoading(true);
           try {
-            await authClient.signOut();
-            // Navigation will happen automatically via Stack.Protected
+            await signOut();
           } catch (error) {
             console.error("Sign out error:", error);
             Alert.alert("Error", "Failed to sign out. Please try again.");
@@ -49,14 +48,14 @@ export default function Settings() {
           <View style={styles.card}>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Name</Text>
-              <Text style={styles.value}>{session?.user?.name || "N/A"}</Text>
+              <Text style={styles.value}>{user?.name || "N/A"}</Text>
             </View>
 
             <View style={styles.divider} />
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Email</Text>
-              <Text style={styles.value}>{session?.user?.email || "N/A"}</Text>
+              <Text style={styles.value}>{user?.email || "N/A"}</Text>
             </View>
           </View>
         </View>

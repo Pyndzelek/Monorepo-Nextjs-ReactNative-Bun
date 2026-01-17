@@ -1,11 +1,11 @@
 import { Stack } from "expo-router";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import useAuth from "@/hooks/useAuth";
 
 function RootLayoutNav() {
-  const { session, isLoading } = useAuth();
+  const { isAuthenticated, isSessionLoading } = useAuth();
 
-  if (isLoading) {
+  if (isSessionLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#3b82f6" />
@@ -13,15 +13,13 @@ function RootLayoutNav() {
     );
   }
 
-  const isLoggedIn = !!session;
-
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={isLoggedIn}>
+      <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(app)/(tabs)" options={{ headerShown: false }} />
       </Stack.Protected>
 
-      <Stack.Protected guard={!isLoggedIn}>
+      <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>
@@ -29,11 +27,7 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
-  );
+  return <RootLayoutNav />;
 }
 
 const styles = StyleSheet.create({

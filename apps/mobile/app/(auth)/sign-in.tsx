@@ -1,8 +1,6 @@
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -14,39 +12,21 @@ import {
   View,
 } from "react-native";
 import { Colors } from "@/constants/colors";
-import { authClient } from "@/lib/auth-client";
+import useAuth from "@/hooks/useAuth";
 
 export default function SignIn() {
-  const router = useRouter();
+  const { signIn, isLoading, errors, clearErrors } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+
+  const getError = (field: "email" | "password") =>
+    errors.find((e) => e.field === field)?.message;
+
+  const globalError = errors.find((e) => !e.field)?.message;
 
   const handleSignIn = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const result = await authClient.signIn.email({
-        email,
-        password,
-      });
-
-      if (result.error) {
-        Alert.alert("Error", result.error.message || "Failed to sign in");
-        return;
-      }
-
-      // Navigation will happen automatically via Stack.Protected
-    } catch (error) {
-      console.error("Sign in error:", error);
-      Alert.alert("Error", "An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
-    }
+    await signIn({ email, password });
   };
 
   return (
@@ -56,41 +36,58 @@ export default function SignIn() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.content}
         >
-          {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Welcome Back!</Text>
+            <Text style={styles.title}>Welcome!</Text>
             <Text style={styles.subtitle}>
               Sign in to your account to continue
             </Text>
+
+            {globalError && (
+              <Text style={styles.errorTextGlobal}>{globalError}</Text>
+            )}
           </View>
 
-          {/* Form */}
           <View style={styles.form}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, getError("email") && styles.inputError]}
                 placeholder="hello@example.com"
                 placeholderTextColor={Colors.textMuted}
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (errors.length) clearErrors();
+                }}
                 autoCapitalize="none"
                 keyboardType="email-address"
-                editable={!isLoading}
               />
+              {/* Field Specific Error */}
+              {getError("email") && (
+                <Text style={styles.errorText}>{getError("email")}</Text>
+              )}
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Password</Text>
               <TextInput
-                style={styles.input}
-                placeholder="••••••••"
+                style={[
+                  styles.input,
+                  getError("password") && styles.inputError,
+                ]}
+                placeholder="********"
                 placeholderTextColor={Colors.textMuted}
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (errors.length) clearErrors();
+                }}
                 secureTextEntry
-                editable={!isLoading}
               />
+              {/* Field Specific Error */}
+              {getError("password") && (
+                <Text style={styles.errorText}>{getError("password")}</Text>
+              )}
             </View>
 
             <Pressable
@@ -98,18 +95,15 @@ export default function SignIn() {
               style={[styles.button, isLoading && styles.buttonDisabled]}
               disabled={isLoading}
             >
-              {isLoading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Sign In</Text>
-              )}
+              <Text style={styles.buttonText}>
+                {isLoading ? "Signing in..." : "Sign In"}
+              </Text>
             </Pressable>
           </View>
 
-          {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>Don't have an account? </Text>
-            <Link href="./sign-up" asChild>
+            <Link href="/sign-up" asChild>
               <Text style={styles.link}>Sign Up</Text>
             </Link>
           </View>
@@ -163,17 +157,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.text,
   },
+  inputError: {
+    borderColor: "#ef4444",
+  },
+  errorText: {
+    color: "#ef4444",
+    fontSize: 12,
+    marginTop: 4,
+  },
+  errorTextGlobal: {
+    color: "#ef4444",
+    fontSize: 14,
+    marginTop: 8,
+    fontWeight: "500",
+  },
   button: {
     backgroundColor: Colors.primary,
     borderRadius: 12,
     padding: 16,
     alignItems: "center",
     marginTop: 8,
-    minHeight: 56,
-    justifyContent: "center",
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   buttonText: {
     color: "#fff",

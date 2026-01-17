@@ -1,143 +1,121 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { Colors } from "@/constants/colors";
-import { authClient } from "@/lib/auth-client";
+import useAuth from "@/hooks/useAuth";
 
 export default function SignUp() {
   const router = useRouter();
+  const { signUp, isLoading, errors, clearErrors } = useAuth();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+
+  const getError = (field: "name" | "email" | "password") =>
+    errors.find((e) => e.field === field)?.message;
+
+  const globalError = errors.find((e) => !e.field)?.message;
 
   const handleSignUp = async () => {
-    if (!name || !email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
-    }
-
-    if (password.length < 8) {
-      Alert.alert("Error", "Password must be at least 8 characters");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const result = await authClient.signUp.email({
-        email,
-        password,
-        name,
-      });
-
-      if (result.error) {
-        Alert.alert(
-          "Error",
-          result.error.message || "Failed to create account"
-        );
-        return;
-      }
-
-      // Navigation will happen automatically via Stack.Protected
-    } catch (error) {
-      console.error("Sign up error:", error);
-      Alert.alert("Error", "An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
-    }
+    await signUp({ name, email, password });
   };
 
   return (
     <View style={styles.container}>
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.content}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Join us and start your journey</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.content}
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.subtitle}>Join us and start your journey</Text>
+          {globalError && (
+            <Text style={styles.errorTextGlobal}>{globalError}</Text>
+          )}
+        </View>
+
+        <View style={styles.form}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Full Name</Text>
+            <TextInput
+              style={[styles.input, getError("name") && styles.inputError]}
+              placeholder="John Doe"
+              placeholderTextColor={Colors.textMuted}
+              value={name}
+              onChangeText={(text) => {
+                setName(text);
+                if (errors.length) clearErrors();
+              }}
+            />
+            {getError("name") && (
+              <Text style={styles.errorText}>{getError("name")}</Text>
+            )}
           </View>
 
-          {/* Form */}
-          <View style={styles.form}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Full Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="John Doe"
-                placeholderTextColor={Colors.textMuted}
-                value={name}
-                onChangeText={setName}
-                editable={!isLoading}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="hello@example.com"
-                placeholderTextColor={Colors.textMuted}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                editable={!isLoading}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="••••••••"
-                placeholderTextColor={Colors.textMuted}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                editable={!isLoading}
-              />
-              <Text style={styles.helperText}>
-                Must be at least 8 characters
-              </Text>
-            </View>
-
-            <Pressable
-              onPress={handleSignUp}
-              style={[styles.button, isLoading && styles.buttonDisabled]}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Sign Up</Text>
-              )}
-            </Pressable>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={[styles.input, getError("email") && styles.inputError]}
+              placeholder="hello@example.com"
+              placeholderTextColor={Colors.textMuted}
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (errors.length) clearErrors();
+              }}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            {getError("email") && (
+              <Text style={styles.errorText}>{getError("email")}</Text>
+            )}
           </View>
 
-          {/* Footer */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account? </Text>
-            <Pressable onPress={() => router.back()} disabled={isLoading}>
-              <Text style={styles.link}>Sign In</Text>
-            </Pressable>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={[styles.input, getError("password") && styles.inputError]}
+              placeholder="********"
+              placeholderTextColor={Colors.textMuted}
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                if (errors.length) clearErrors();
+              }}
+              secureTextEntry
+            />
+            {getError("password") && (
+              <Text style={styles.errorText}>{getError("password")}</Text>
+            )}
           </View>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
+
+          <Pressable
+            onPress={handleSignUp}
+            style={[styles.button, isLoading && styles.buttonDisabled]}
+            disabled={isLoading}
+          >
+            <Text style={styles.buttonText}>
+              {isLoading ? "Creating Account..." : "Sign Up"}
+            </Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Already have an account? </Text>
+          <Pressable onPress={() => router.back()}>
+            <Text style={styles.link}>Sign In</Text>
+          </Pressable>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -186,10 +164,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.text,
   },
-  helperText: {
+  inputError: {
+    borderColor: "#ef4444",
+  },
+  errorText: {
+    color: "#ef4444",
     fontSize: 12,
-    color: Colors.textMuted,
     marginTop: 4,
+  },
+  errorTextGlobal: {
+    color: "#ef4444",
+    fontSize: 14,
+    marginTop: 8,
+    fontWeight: "500",
   },
   button: {
     backgroundColor: Colors.primary,
@@ -197,11 +184,9 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: "center",
     marginTop: 8,
-    minHeight: 56,
-    justifyContent: "center",
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   buttonText: {
     color: "#fff",
