@@ -15,7 +15,7 @@ export default function Index() {
       <Text style={{ fontSize: 22, color: Colors.text }}>
         You are logged in as{" "}
         <Text style={{ color: Colors.primary, fontWeight: "bold" }}>
-          {user.name}
+          {user?.name}
         </Text>
       </Text>
     </View>

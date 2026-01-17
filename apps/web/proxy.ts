@@ -6,7 +6,7 @@ const client = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_API_URL + "/api/auth",
 });
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const { data: session } = await client.getSession({

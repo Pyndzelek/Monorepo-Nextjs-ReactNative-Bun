@@ -7,70 +7,98 @@ import type { SignInInput, SignUpInput } from "@repo/db/validation";
 export function useAuth() {
   const router = useRouter();
 
+  //  Better Auth's built-in session hook handles caching automatically
   const { data: session, isPending, error, refetch } = useSession();
 
-  // Sign In Mutation
-  const loginMutation = useMutation({
-    mutationFn: async (data: SignInInput) => {
-      const { error } = await signIn.email({
-        email: data.email,
-        password: data.password,
+  // Sign In
+  const login = useMutation({
+    mutationFn: async (credentials: SignInInput) => {
+      const { data, error } = await signIn.email({
+        email: credentials.email,
+        password: credentials.password,
       });
 
-      if (error) throw error;
+      if (error) {
+        throw new Error(error.message || "Invalid email or password");
+      }
+
+      return data;
     },
     onSuccess: async () => {
       await refetch();
       toast.success("Welcome back!");
       router.push("/dashboard");
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Failed to sign in");
+    onError: (error: Error) => {
+      toast.error(error.message);
     },
   });
 
-  // Sign Up Mutation
-  const registerMutation = useMutation({
-    mutationFn: async (data: SignUpInput) => {
-      const { error } = await signUp.email({
-        email: data.email,
-        password: data.password,
-        name: data.name,
+  // Sign Up
+  const register = useMutation({
+    mutationFn: async (userData: SignUpInput) => {
+      const { data, error } = await signUp.email({
+        email: userData.email,
+        password: userData.password,
+        name: userData.name,
       });
 
-      if (error) throw error;
+      if (error) {
+        throw new Error(
+          error.message || "Failed to create account. Please try again."
+        );
+      }
+
+      return data;
     },
     onSuccess: async () => {
-      await refetch();
+      await refetch(); // Refetch session after successful registration
       toast.success("Account created successfully!");
       router.push("/dashboard");
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Failed to create account");
+    onError: (error: Error) => {
+      toast.error(error.message);
     },
   });
 
-  // Sign Out Mutation
-  const logoutMutation = useMutation({
+  // Sign Out
+  const logout = useMutation({
     mutationFn: async () => {
       const { error } = await signOut();
-      if (error) throw error;
+
+      if (error) {
+        throw new Error(error.message || "Failed to sign out");
+      }
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await refetch(); // Refetch to clear session after logout
+      toast.success("Signed out successfully");
       router.push("/sign-in");
       router.refresh();
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Failed to sign out");
+    onError: (error: Error) => {
+      toast.error(error.message);
     },
   });
 
+  // Derived states
+  const isAuthenticated = !!session?.user;
+  const isLoading =
+    isPending || login.isPending || register.isPending || logout.isPending;
+
   return {
     session,
+    user: session?.user ?? null,
+    isAuthenticated,
+    isLoading,
     isPending,
+
     error,
-    login: loginMutation,
-    register: registerMutation,
-    logout: logoutMutation,
+
+    login,
+    register,
+    logout,
+
+    refetch,
   };
 }
