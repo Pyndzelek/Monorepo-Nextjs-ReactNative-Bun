@@ -1,12 +1,7 @@
-# Monorepo boilerplate
+# Monorepo auth boilerplate
 
-## This branch provides a structure where zod schemas generated with drizzle-zod are inside db package
+### This branch provides additional React Native mobile app integrated innto the auth system
 
-A production-ready, high-performance full-stack monorepo featuring: **Bun**, **Hono**, and **Next.js**.
-
-This architecture prioritizes **End-to-End Type Safety**, **Developer Experience**, and **Scalability**.
-
----
 
 ## Tech stack
 
@@ -28,6 +23,10 @@ This architecture prioritizes **End-to-End Type Safety**, **Developer Experience
 - **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
 - **Fetching:** Server Components + Hono RPC Client
 
+### Frontend (`apps/mobile`)
+- **Framework:** [React Native](https://reactnative.dev/) (Expo)
+
+
 ### Database (`packages/db`)
 
 - **ORM:** [Drizzle ORM](https://orm.drizzle.team/)
@@ -41,6 +40,7 @@ This architecture prioritizes **End-to-End Type Safety**, **Developer Experience
 ```text
 .
 ├── apps
+│   └── mobile       # Expo React Native mobile app
 │   ├── api          # Hono server running on Bun (Port 5000)
 │   │   └── src/routes  # Modular API route definitions
 │   └── web          # Next.js 16 Frontend (Port 3000)
@@ -79,7 +79,8 @@ Follow these steps to get the project running locally in under 5 minutes.
 ### 2. Clone & Install
 
 ```bash
-git clone
+git clone --branch mobile --single-branch git@github.com:Pyndzelek/Monorepo-Nextjs-ReactNative-Bun.git 
+rm -rf .git
 
 # Install dependencies for all apps and packages
 pnpm install
